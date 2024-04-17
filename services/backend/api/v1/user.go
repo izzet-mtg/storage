@@ -1,4 +1,4 @@
-package admin
+package api
 
 import (
 	"crypto/sha512"
@@ -21,9 +21,9 @@ type User struct {
 
 func hashPassword(p string) (string, error) {
 	s := sha512.Sum512([]byte(p))
-	hp, err := brcypt.GenerateFromPassword(s[:], 10)
+	hp, err := bcrypt.GenerateFromPassword(s[:], 10)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	return hex.EncodeToString(hp), nil
 }
@@ -46,7 +46,7 @@ func CreateUser(p *pgxpool.Pool) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
-		cu, err := queries.CreateUser(c, db.CreateUserParams{
+		_, err = queries.CreateUser(c, db.CreateUserParams{
 			Name:     u.Name,
 			Email:    u.Email,
 			Password: hp,

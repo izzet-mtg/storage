@@ -7,7 +7,7 @@ import (
 	//"reflect"
 
 	"github.com/gin-gonic/gin"
-	adminv1 "github.com/izzet-mtg/storage/services/backend/api/v1/admin"
+	apiv1 "github.com/izzet-mtg/storage/services/backend/api/v1"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -22,7 +22,7 @@ func run(conStr string) error {
 
 	r := gin.Default()
 	v1 := r.Group("v1")
-	v1.POST("admin/user", adminv1.CreateUser(pool))
+	v1.POST("user", apiv1.CreateUser(pool))
 	r.Run()
 
 	return nil
