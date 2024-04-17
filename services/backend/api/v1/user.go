@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 
@@ -14,9 +15,9 @@ import (
 )
 
 type User struct {
-	Name     string
-	Email    string
-	Password string
+	Name     string `validate:"required"`
+	Email    string `validate:"required,email"`
+	Password string `validate:"required,min=8"`
 }
 
 func hashPassword(p string) (string, error) {
@@ -34,6 +35,13 @@ func CreateUser(p *pgxpool.Pool) gin.HandlerFunc {
 
 		var u User
 		if err := c.ShouldBindJSON(&u); err != nil {
+			log.Println("[Info] reject user request with invalid structure")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user structure"})
+			return
+		}
+
+		validate := validator.New(validator.WithRequiredStructEnabled())
+		if err := validate.Struct(u); err != nil {
 			log.Println("[Info] reject user request with invalid structure")
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user structure"})
 			return
