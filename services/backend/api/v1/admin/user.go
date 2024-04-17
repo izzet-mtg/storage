@@ -1,11 +1,14 @@
 package admin
 
 import (
+	"crypto/sha512"
+	"encoding/hex"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/izzet-mtg/storage/services/backend/db"
 )
@@ -26,10 +29,18 @@ func CreateUser(p *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
+		s := sha512.Sum512([]byte(u.Password))
+		hp, err := bcrypt.GenerateFromPassword(s[:], 16)
+		if err != nil {
+			log.Printf("[Error] cannot create user")
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
 		cu, err := queries.CreateUser(c, db.CreateUserParams{
 			Name:     u.Name,
 			Email:    u.Email,
-			Password: u.Password,
+			Password: hex.EncodeToString(hp),
 		})
 		if err != nil {
 			log.Printf("[Error] cannot create user")
