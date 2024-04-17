@@ -11,10 +11,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func run(pgConStr string) error {
+func run(conStr string) error {
 	ctx := context.Background()
 
-	pool, err := pgxpool.New(ctx, pgConStr)
+	pool, err := pgxpool.New(ctx, conStr)
 	if err != nil {
 		return err
 	}
