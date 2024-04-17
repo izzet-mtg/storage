@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=app
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+  web:
+    build: .
+    ports:
+      - '8080:8080'
+    environment:
+      - 'DB_URI=postgresql://postgres:postgres@db/app'
+    depends_on:
+      - db
+  debugger:
+    image: postgres:16
+    entrypoint: /bin/sleep infinity
