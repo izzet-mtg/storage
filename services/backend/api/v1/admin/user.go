@@ -57,7 +57,6 @@ func CreateUser(p *pgxpool.Pool) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
-		log.Printf("%v\n", cu)
 
 		c.JSON(http.StatusOK, gin.H{"message": "user created"})
 	}
