@@ -30,7 +30,7 @@ func CreateUser(p *pgxpool.Pool) gin.HandlerFunc {
 		}
 
 		s := sha512.Sum512([]byte(u.Password))
-		hp, err := bcrypt.GenerateFromPassword(s[:], 16)
+		hp, err := bcrypt.GenerateFromPassword(s[:], 10)
 		if err != nil {
 			log.Printf("[Error] cannot create user")
 			log.Println(err)
