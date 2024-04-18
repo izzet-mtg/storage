@@ -7,14 +7,18 @@ services:
       - POSTGRES_DB=app
     volumes:
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+  redis:
+    image: valkey/valkey:7.2
   web:
     build: .
     ports:
       - '8080:8080'
     environment:
       - 'DB_URI=postgresql://postgres:postgres@db/app'
+      - 'REDIS_URL=redis://redis'
     depends_on:
       - db
+      - redis
   debugger:
     image: postgres:16
     entrypoint: /bin/sleep infinity
