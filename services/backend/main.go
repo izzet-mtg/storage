@@ -31,6 +31,7 @@ func run(conStr string, redisURL string) error {
 	r := gin.Default()
 	v1 := r.Group("v1")
 	v1.POST("user", apiv1.CreateUser(pool, rc))
+	v1.POST("login", apiv1.Login(pool, rc))
 	r.Run()
 
 	return nil

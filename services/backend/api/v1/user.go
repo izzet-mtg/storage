@@ -36,8 +36,8 @@ func isSamePassword(p, hp string) bool {
 }
 
 type LoginingUser struct {
-	NameOrEmail string
-	RawPassword string
+	NameOrEmail string `validate:"required"`
+	RawPassword string `validate:"required" json:"password"`
 }
 
 var ErrNoSuchUser = errors.New("no such user")
@@ -107,6 +107,41 @@ func CreateUser(p *pgxpool.Pool, rc *redis.Client) gin.HandlerFunc {
 			NameOrEmail: u.Name,
 			RawPassword: u.Password,
 		}
+		// TODO: Parameterized login expiration duration
+		d, err := time.ParseDuration("24h")
+		if err != nil {
+			log.Println("[Error] session id expiration duration format is invalid")
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot login user"})
+			return
+		}
+		si, err := login(c, p, rc, lu, d)
+		if err != nil {
+			log.Println("[Error] cannot loging user")
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot login user"})
+			return
+		}
+		c.Header("Authorization", fmt.Sprintf("Bearer %s", si))
+		c.JSON(http.StatusOK, gin.H{"message": "user created"})
+	}
+}
+
+func Login(p *pgxpool.Pool, rc *redis.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var lu LoginingUser
+		if err := c.ShouldBindJSON(&lu); err != nil {
+			log.Println("[Info] reject user request with invalid structure")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user structure"})
+			return
+		}
+		validate := validator.New(validator.WithRequiredStructEnabled())
+		if err := validate.Struct(lu); err != nil {
+			log.Println("[Info] reject user request with invalid structure")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user structure"})
+			return
+		}
+
 		// TODO: Parameterized login expiration duration
 		d, err := time.ParseDuration("24h")
 		if err != nil {
