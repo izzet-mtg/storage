@@ -19,6 +19,3 @@ services:
     depends_on:
       - db
       - redis
-  debugger:
-    image: postgres:16
-    entrypoint: /bin/sleep infinity
