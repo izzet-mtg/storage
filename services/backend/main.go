@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
-	//"reflect"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -13,7 +13,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func run(conStr string, redisURL string) error {
+func run(conStr string, redisURL string, exp time.Duration) error {
 	ctx := context.Background()
 
 	pool, err := pgxpool.New(ctx, conStr)
@@ -30,8 +30,8 @@ func run(conStr string, redisURL string) error {
 
 	r := gin.Default()
 	v1 := r.Group("v1")
-	v1.POST("user", apiv1.CreateUser(pool, rc))
-	v1.POST("login", apiv1.Login(pool, rc))
+	v1.POST("user", apiv1.CreateUser(pool, rc, exp))
+	v1.POST("login", apiv1.Login(pool, rc, exp))
 	v1.DELETE("logout", apiv1.Logout(rc))
 	r.Run()
 
@@ -39,7 +39,11 @@ func run(conStr string, redisURL string) error {
 }
 
 func main() {
-	if err := run(os.Getenv("DB_URI"), os.Getenv("REDIS_URL")); err != nil {
+	exp, err := time.ParseDuration("24h")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := run(os.Getenv("DB_URI"), os.Getenv("REDIS_URL"), exp); err != nil {
 		log.Fatal(err)
 	}
 }

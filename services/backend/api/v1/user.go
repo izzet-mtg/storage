@@ -67,7 +67,7 @@ type User struct {
 	Password string `validate:"required,min=8"`
 }
 
-func CreateUser(p *pgxpool.Pool, rc *redis.Client) gin.HandlerFunc {
+func CreateUser(p *pgxpool.Pool, rc *redis.Client, exp time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		queries := db.New(p)
 
@@ -108,15 +108,7 @@ func CreateUser(p *pgxpool.Pool, rc *redis.Client) gin.HandlerFunc {
 			NameOrEmail: u.Name,
 			RawPassword: u.Password,
 		}
-		// TODO: Parameterized login expiration duration
-		d, err := time.ParseDuration("24h")
-		if err != nil {
-			log.Println("[Error] session id expiration duration format is invalid")
-			log.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot login user"})
-			return
-		}
-		si, err := login(c, p, rc, lu, d)
+		si, err := login(c, p, rc, lu, exp)
 		if err != nil {
 			log.Println("[Error] cannot loging user")
 			log.Println(err)
@@ -128,7 +120,7 @@ func CreateUser(p *pgxpool.Pool, rc *redis.Client) gin.HandlerFunc {
 	}
 }
 
-func Login(p *pgxpool.Pool, rc *redis.Client) gin.HandlerFunc {
+func Login(p *pgxpool.Pool, rc *redis.Client, exp time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var lu LoginingUser
 		if err := c.ShouldBindJSON(&lu); err != nil {
@@ -143,15 +135,7 @@ func Login(p *pgxpool.Pool, rc *redis.Client) gin.HandlerFunc {
 			return
 		}
 
-		// TODO: Parameterized login expiration duration
-		d, err := time.ParseDuration("24h")
-		if err != nil {
-			log.Println("[Error] session id expiration duration format is invalid")
-			log.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot login user"})
-			return
-		}
-		si, err := login(c, p, rc, lu, d)
+		si, err := login(c, p, rc, lu, exp)
 		if err != nil {
 			log.Println("[Error] cannot loging user")
 			log.Println(err)
