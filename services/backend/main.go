@@ -32,6 +32,7 @@ func run(conStr string, redisURL string) error {
 	v1 := r.Group("v1")
 	v1.POST("user", apiv1.CreateUser(pool, rc))
 	v1.POST("login", apiv1.Login(pool, rc))
+	v1.DELETE("logout", apiv1.Logout(rc))
 	r.Run()
 
 	return nil

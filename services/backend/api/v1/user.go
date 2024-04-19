@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -159,5 +160,22 @@ func Login(p *pgxpool.Pool, rc *redis.Client) gin.HandlerFunc {
 		}
 		c.Header("Authorization", fmt.Sprintf("Bearer %s", si))
 		c.JSON(http.StatusOK, gin.H{"message": "logined"})
+	}
+}
+
+var bearerTokenRegexp = regexp.MustCompile("^\\s*Bearer\\s*")
+
+func Logout(rc *redis.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		t := bearerTokenRegexp.ReplaceAllString(c.GetHeader("Authorization"), "")
+		fmt.Printf("Authorization = %v\n", t)
+		if err := user.Logout(c, rc, t); err != nil {
+			log.Println("[Error] cannot delete session id")
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "logout"})
 	}
 }

@@ -21,3 +21,7 @@ func Login(ctx context.Context, rc *redis.Client, ui int64, exp time.Duration) (
 	}
 	return si, nil
 }
+
+func Logout(ctx context.Context, rc *redis.Client, si string) error {
+	return rc.Del(ctx, si).Err()
+}
