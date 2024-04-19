@@ -158,6 +158,6 @@ func Login(p *pgxpool.Pool, rc *redis.Client) gin.HandlerFunc {
 			return
 		}
 		c.Header("Authorization", fmt.Sprintf("Bearer %s", si))
-		c.JSON(http.StatusOK, gin.H{"message": "user created"})
+		c.JSON(http.StatusOK, gin.H{"message": "logined"})
 	}
 }
