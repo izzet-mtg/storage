@@ -65,6 +65,7 @@ type User struct {
 	Name     string `validate:"required"`
 	Email    string `validate:"required,email"`
 	Password string `validate:"required,min=8"`
+	IsAdmin  bool
 }
 
 func CreateUser(p *pgxpool.Pool, rc *redis.Client, exp time.Duration) gin.HandlerFunc {
@@ -96,6 +97,7 @@ func CreateUser(p *pgxpool.Pool, rc *redis.Client, exp time.Duration) gin.Handle
 			Name:     u.Name,
 			Email:    u.Email,
 			Password: hp,
+			IsAdmin:  u.IsAdmin,
 		})
 		if err != nil {
 			log.Printf("[Error] cannot create user")

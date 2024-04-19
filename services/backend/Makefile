@@ -28,3 +28,7 @@ docker-compose-down:
 .PHONY: clean
 clean:
 	docker rmi "$(IMAGE_REPOSITORY):$(IMAGE_VERSION)" "$(IMAGE_REPOSITORY):latest"
+
+.PHONY: generate-db-code
+generate-db-code:
+	sqlc generate

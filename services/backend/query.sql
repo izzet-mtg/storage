@@ -4,9 +4,9 @@ WHERE name = $1 or email = $1 LIMIT 1;
 
 -- name: CreateUser :one
 INSERT INTO users (
-  name, email, password
+  name, email, password, is_admin
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 )
 RETURNING *;
 

@@ -11,33 +11,40 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-  name, email, password
+  name, email, password, is_admin
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 )
-RETURNING id, name, password, email
+RETURNING id, name, password, email, is_admin
 `
 
 type CreateUserParams struct {
 	Name     string
 	Email    string
 	Password string
+	IsAdmin  bool
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email, arg.Password)
+	row := q.db.QueryRow(ctx, createUser,
+		arg.Name,
+		arg.Email,
+		arg.Password,
+		arg.IsAdmin,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Password,
 		&i.Email,
+		&i.IsAdmin,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, name, password, email FROM users
+SELECT id, name, password, email, is_admin FROM users
 WHERE name = $1 or email = $1 LIMIT 1
 `
 
@@ -49,6 +56,7 @@ func (q *Queries) GetUser(ctx context.Context, name string) (User, error) {
 		&i.Name,
 		&i.Password,
 		&i.Email,
+		&i.IsAdmin,
 	)
 	return i, err
 }
