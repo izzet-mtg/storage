@@ -103,19 +103,6 @@ func CreateUser(p *pgxpool.Pool, rc *redis.Client, exp time.Duration) gin.Handle
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
-
-		lu := LoginingUser{
-			NameOrEmail: u.Name,
-			RawPassword: u.Password,
-		}
-		si, err := login(c, p, rc, lu, exp)
-		if err != nil {
-			log.Println("[Error] cannot loging user")
-			log.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot login user"})
-			return
-		}
-		c.Header("Authorization", fmt.Sprintf("Bearer %s", si))
 		c.JSON(http.StatusOK, gin.H{"message": "user created"})
 	}
 }
