@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 
+	"github.com/izzet-mtg/storage/services/backend/api/management"
 	apiv1 "github.com/izzet-mtg/storage/services/backend/api/v1"
 	adminapiv1 "github.com/izzet-mtg/storage/services/backend/api/v1/admin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -30,6 +31,7 @@ func run(conStr string, redisURL string, exp time.Duration) error {
 	rc := redis.NewClient(ropts)
 
 	r := gin.Default()
+	r.GET("-/healthy", mgmtapi.Healthy)
 	v1 := r.Group("v1")
 	v1.POST("login", apiv1.Login(pool, rc, exp))
 	v1.DELETE("logout", apiv1.Logout(rc))
